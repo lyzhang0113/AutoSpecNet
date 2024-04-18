@@ -128,5 +128,5 @@ dmypy.json
 *.jpg
 
 # Result
-history.csv
+*.csv
 model.pth

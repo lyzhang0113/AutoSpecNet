@@ -100,6 +100,7 @@ def main():
 
     criterion = nn.CrossEntropyLoss()
     optimizer = OPTIM(model.parameters(), lr=LR, momentum=MOMENTUM, weight_decay=WEIGHT_DECAY)
+    # optimizer = OPTIM(model.parameters(), lr=LR, weight_decay=WEIGHT_DECAY)
     lr_scheduler = optim.lr_scheduler.MultiStepLR(optimizer, [100, 150], gamma=0.1)
     train_loader, test_loader = prepare_loader()
 

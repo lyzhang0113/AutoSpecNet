@@ -68,7 +68,7 @@ def test(ep, loader: torch.utils.data.DataLoader, model, criterion):
     valres = {
         'val_loss': loss_meter,
         'val_acc': acc_meter,
-        'train_year_acc': year_acc_meter,
+        'val_year_acc': year_acc_meter,
         'val_make_acc': make_acc_meter,
         'val_type_acc': type_acc_meter,
     }

@@ -10,7 +10,7 @@ RESCALE_SIZE = 400
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu') 
 NUM_WORKERS = 4
 BATCH_SIZE = 32
-NUM_EPOCHS = 10
+NUM_EPOCHS = 40
 
 YEAR_LOSS = 0.1
 MAKE_LOSS = 0.1
