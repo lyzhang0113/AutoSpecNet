@@ -127,5 +127,6 @@ def main():
 
 
 if __name__ == '__main__':
-    ic.disable()
-    main()
+    ic(get_num_classes())
+    # ic.disable()
+    # main()

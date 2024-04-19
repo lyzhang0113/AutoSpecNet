@@ -6,3 +6,4 @@ scipy
 tqdm
 loguru
 pandas
+matplotlib

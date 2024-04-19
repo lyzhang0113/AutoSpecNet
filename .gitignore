@@ -127,6 +127,9 @@ dmypy.json
 # Dataset
 *.jpg
 
+# Plot
+*.png
+
 # Result
 *.csv
 model.pth
