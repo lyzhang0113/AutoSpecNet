@@ -35,7 +35,7 @@ TRAIN_TRANSFORM = transforms.Compose([
     transforms.Resize((RESCALE_SIZE, RESCALE_SIZE)),
     transforms.RandomHorizontalFlip(),
     # transforms.RandomIoUCrop(), # https://arxiv.org/abs/1512.02325
-    transforms.TrivialAugmentWide(), # https://arxiv.org/abs/2103.10158
+    # transforms.TrivialAugmentWide(), # https://arxiv.org/abs/2103.10158
     transforms.ToImage(),  # Converts PIL Images or NumPy arrays to torch.float32 tensors
     transforms.ToDtype(torch.float32, scale=True), 
     transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
@@ -44,7 +44,7 @@ TEST_TRANSFORM = transforms.Compose([
     transforms.Resize((RESCALE_SIZE, RESCALE_SIZE)),
     # transforms.RandomHorizontalFlip(),
     # transforms.RandomIoUCrop(), # https://arxiv.org/abs/1512.02325
-    transforms.TrivialAugmentWide(), # https://arxiv.org/abs/2103.10158
+    # transforms.TrivialAugmentWide(), # https://arxiv.org/abs/2103.10158
     transforms.ToImage(),  # Converts PIL Images or NumPy arrays to torch.float32 tensors
     transforms.ToDtype(torch.float32, scale=True), 
     transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),

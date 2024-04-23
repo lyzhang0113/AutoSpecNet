@@ -1,5 +1,6 @@
 import torch
 from tqdm import tqdm
+from icecream import ic
 
 from util.dataset import prepare_loader, get_num_classes
 from util.constants import *
@@ -7,7 +8,7 @@ from util.model import AutoSpecNet
 from util.helpers import format_significant
 
 
-def test(ep, loader: torch.utils.data.DataLoader, model, criterion):
+def test(ep, loader: torch.utils.data.DataLoader, model, criterion, generate_images = False):
     model.eval()
 
     loss_meter = 0
@@ -16,6 +17,13 @@ def test(ep, loader: torch.utils.data.DataLoader, model, criterion):
     make_acc_meter = 0
     type_acc_meter = 0
     runcount = 0
+
+    year_positive_example = None
+    year_negative_example = None
+    make_positive_example = None
+    make_negative_example = None
+    type_positive_example = None
+    type_negative_example = None
 
     i = 0
     # since we're not training, we don't need to calculate the gradients for our outputs
@@ -58,6 +66,33 @@ def test(ep, loader: torch.utils.data.DataLoader, model, criterion):
                 f'| Make: {format_significant(make_acc_meter / runcount)} '
                 f'| Type: {format_significant(type_acc_meter / runcount)} '
                 )
+            
+            
+            if generate_images:
+                import numpy as np
+                ic.disable()
+                year_pred = ic(torch.argmax(year_pred, dim=1))
+                make_pred = ic(torch.argmax(make_pred, dim=1))
+                type_pred = ic(torch.argmax(type_pred, dim=1))
+
+                if year_positive_example is None and len(idx:=torch.argwhere(year_target == year_pred).squeeze()) > 0:
+                    idx = np.random.choice(idx.cpu())
+                    year_positive_example = (data[idx], year_pred[idx].item(), year_target[idx].item())
+                if make_positive_example is None and len(idx:=torch.argwhere(make_target == make_pred).squeeze()) > 0:
+                    idx = np.random.choice(idx.cpu())
+                    make_positive_example = (data[idx], make_pred[idx].item(), make_target[idx].item())
+                if type_positive_example is None and len(idx:=torch.argwhere(type_target == type_pred).squeeze()) > 0:
+                    idx = np.random.choice(idx.cpu())
+                    type_positive_example = (data[idx], type_pred[idx].item(), type_target[idx].item())
+                if year_negative_example is None and (idx:=torch.argwhere(year_target != year_pred).squeeze()).dim() > 0:
+                    idx = np.random.choice(idx.cpu())
+                    year_negative_example = (data[idx], year_pred[idx].item(), year_target[idx].item())
+                if make_negative_example is None and len(idx:=torch.argwhere(make_target != make_pred).squeeze()) > 0:
+                    idx = np.random.choice(idx.cpu())
+                    make_negative_example = (data[idx], make_pred[idx].item(), make_target[idx].item())
+                if type_negative_example is None and len(idx:=torch.argwhere(type_target != type_pred).squeeze()) > 0:
+                    idx = np.random.choice(idx.cpu())
+                    type_negative_example = (data[idx], type_pred[idx].item(), type_target[idx].item())
 
         loss_meter /= runcount
         acc_meter /= runcount
@@ -72,8 +107,16 @@ def test(ep, loader: torch.utils.data.DataLoader, model, criterion):
         'val_make_acc': make_acc_meter,
         'val_type_acc': type_acc_meter,
     }
+    exampleres = {
+        'year_positive': year_positive_example,
+        'year_negative': year_negative_example,
+        'make_positive': make_positive_example,
+        'make_negative': make_negative_example,
+        'type_positive': type_positive_example,
+        'type_negative': type_negative_example,
+    }
 
-    return valres
+    return valres if not generate_images else exampleres
 
 
 def load_weight(model, path, device):
@@ -86,8 +129,22 @@ def main():
     num_classes, num_years, num_makes, num_types = get_num_classes()
     model = AutoSpecNet(BASE_MODEL, num_classes, num_years, num_makes, num_types)
     load_weight(model, MODEL_PATH, DEVICE)
+    criterion = torch.nn.CrossEntropyLoss()
     model = model.to(DEVICE)
 
-    train_loader, test_loader = prepare_loader()
-    test(test_loader, model)
+    _, test_loader = prepare_loader()
+    images = test(0, test_loader, model, criterion, generate_images=True)
 
+    # Show Examples
+    from plot_helper import get_all_classes, imshow
+    year_classes, make_classes, type_classes = get_all_classes()
+    imshow(images['year_positive'], year_classes, 'year_positive.png')
+    imshow(images['year_negative'], year_classes, 'year_negative.png')
+    imshow(images['make_positive'], make_classes, 'make_positive.png')
+    imshow(images['make_negative'], make_classes, 'make_negative.png')
+    imshow(images['type_positive'], type_classes, 'type_positive.png')
+    imshow(images['type_negative'], type_classes, 'type_negative.png')
+
+
+if __name__ == "__main__":
+    main()
